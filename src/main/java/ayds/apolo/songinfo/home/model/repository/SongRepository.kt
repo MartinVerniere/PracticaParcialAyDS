@@ -15,6 +15,12 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.io.IOException
 
 
+private const val WIKI_URL = "https://en.wikipedia.org/w/"
+private const val JSON = "JSON"
+private const val QUERY = "query"
+private const val SEARCH = "search"
+private const val SNIPPET = "snippet"
+
 class SongRepository {
 
     internal val sls = SpotifySqlDBImpl(
@@ -26,7 +32,7 @@ class SongRepository {
 
     ///// Wiki
     var retrofit: Retrofit? = Retrofit.Builder()
-        .baseUrl("https://en.wikipedia.org/w/")
+        .baseUrl(WIKI_URL)
         .addConverterFactory(ScalarsConverterFactory.create())
         .build()
 
@@ -63,13 +69,13 @@ class SongRepository {
         val callResponse: Response<String>
         try {
             callResponse = wikipediaAPI.getInfo(term).execute()
-            System.out.println("JSON " + callResponse.body())
+            System.out.println(JSON + callResponse.body())
             val gson = Gson()
             val jobj: JsonObject = gson.fromJson(callResponse.body(), JsonObject::class.java)
-            val query = jobj["query"].asJsonObject
-            val snippetObj = query["search"].asJsonArray.firstOrNull()
+            val query = jobj[QUERY].asJsonObject
+            val snippetObj = query[SEARCH].asJsonArray.firstOrNull()
             if (snippetObj != null) {
-                val snippet = snippetObj.asJsonObject["snippet"]
+                val snippet = snippetObj.asJsonObject[SNIPPET]
                 return SpotifySong("", snippet.asString, " - ", " - ", " - ", "", "")
             }
         } catch (e1: IOException) {
