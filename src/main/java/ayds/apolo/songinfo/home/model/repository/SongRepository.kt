@@ -23,12 +23,12 @@ private const val SNIPPET = "snippet"
 
 class SongRepository {
 
-    internal val sls = SpotifySqlDBImpl(
+    internal val spotifyLocalStorage = SpotifySqlDBImpl(
         SpotifySqlQueriesImpl(), ResultSetToSpotifySongMapperImpl()
     )
-    val sts = SpotifyModule.spotifyTrackService
+    val spotifyTrackService = SpotifyModule.spotifyTrackService
 
-    val theCache = mutableMapOf<String, SpotifySong>()
+    val spotifyCache = mutableMapOf<String, SpotifySong>()
 
     ///// Wiki
     var retrofit: Retrofit? = Retrofit.Builder()
@@ -43,25 +43,25 @@ class SongRepository {
         var s: SpotifySong?
 
         // check in the cache
-        s = theCache[term]
+        s = spotifyCache[term]
         if (s != null) {
             s.isCacheStored = true
             return s
         }
 
         // check in the DB
-        s = sls.getSongByTerm(term)
+        s = spotifyLocalStorage.getSongByTerm(term)
         if (s != null) {
             s.isLocallyStored = true
             // update the cache
-            theCache[term] = s
+            spotifyCache[term] = s
             return s
         }
 
         // the service
-        s = sts.getSong(term)
+        s = spotifyTrackService.getSong(term)
         if (s != null) {
-            sls.insertSong(term, s)
+            spotifyLocalStorage.insertSong(term, s)
             return s
         }
 
