@@ -3,10 +3,8 @@ package ayds.apolo.songinfo.home.model.repository
 import ayds.apolo.songinfo.home.model.entities.EmptySong
 import ayds.apolo.songinfo.home.model.entities.SearchResult
 import ayds.apolo.songinfo.home.model.entities.SpotifySong
-import ayds.apolo.songinfo.home.model.repository.external.spotify.SpotifyModule
-import ayds.apolo.songinfo.home.model.repository.local.spotify.sqldb.ResultSetToSpotifySongMapperImpl
+import ayds.apolo.songinfo.home.model.repository.external.spotify.SpotifyTrackService
 import ayds.apolo.songinfo.home.model.repository.local.spotify.sqldb.SpotifySqlDBImpl
-import ayds.apolo.songinfo.home.model.repository.local.spotify.sqldb.SpotifySqlQueriesImpl
 import com.google.gson.Gson
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
@@ -25,12 +23,10 @@ interface SongRepository {
     fun getSongByTerm(term: String): SearchResult
 }
 
-internal class SongRepositoryImpl: SongRepository {
-
-    private val spotifyLocalStorage = SpotifySqlDBImpl(
-        SpotifySqlQueriesImpl(), ResultSetToSpotifySongMapperImpl()
-    )
-    private val spotifyTrackService = SpotifyModule.spotifyTrackService
+internal class SongRepositoryImpl(
+    private val spotifyLocalStorage: SpotifySqlDBImpl,
+    private val spotifyTrackService: SpotifyTrackService
+): SongRepository {
 
     private val spotifyCache = mutableMapOf<String, SpotifySong>()
 
