@@ -28,14 +28,11 @@ internal class SongRepositoryImpl(
     private val spotifyTrackService: SpotifyTrackService
 ): SongRepository {
 
-    private val spotifyCache = mutableMapOf<String, SpotifySong>()
+    private val spotifyCache = initCache()
 
-    private var retrofit: Retrofit? = Retrofit.Builder()
-        .baseUrl(WIKI_URL)
-        .addConverterFactory(ScalarsConverterFactory.create())
-        .build()
+    private var retrofit: Retrofit = initRetrofit()
 
-    private var wikipediaAPI: WikipediaAPI = retrofit!!.create(WikipediaAPI::class.java)
+    private var wikipediaAPI: WikipediaAPI = initWikipediaAPI(retrofit)
 
     override fun getSongByTerm(term: String): SearchResult {
         var spotifySong = searchSongInCache(term)
@@ -61,6 +58,13 @@ internal class SongRepositoryImpl(
 
         return spotifySong ?: EmptySong
     }
+
+    private fun initCache() = mutableMapOf<String, SpotifySong>()
+    private fun initRetrofit() = Retrofit.Builder()
+        .baseUrl(WIKI_URL)
+        .addConverterFactory(ScalarsConverterFactory.create())
+        .build()
+    private fun initWikipediaAPI(retrofit: Retrofit) = retrofit.create(WikipediaAPI::class.java)
 
     private fun searchSongInCache(term: String) = spotifyCache[term]
 
