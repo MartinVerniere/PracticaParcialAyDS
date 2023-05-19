@@ -68,19 +68,13 @@ internal class SongRepositoryImpl(
 
     private fun searchSongInCache(term: String) = spotifyCache[term]
 
-    private fun markSongAsCacheStored(spotifySong: SpotifySong) {
-        spotifySong.isCacheStored = true
-    }
+    private fun markSongAsCacheStored(spotifySong: SpotifySong) { spotifySong.isCacheStored = true }
 
-    private fun updateCacheWithSong(term: String, spotifySong: SpotifySong) {
-        spotifyCache[term] = spotifySong
-    }
+    private fun updateCacheWithSong(term: String, spotifySong: SpotifySong) { spotifyCache[term] = spotifySong }
 
     private fun searchSongInLocalStorage(term: String) = spotifyLocalStorage.getSongByTerm(term)
 
-    private fun markSongAsLocallyStored(spotifySong: SpotifySong) {
-        spotifySong.isLocallyStored = true
-    }
+    private fun markSongAsLocallyStored(spotifySong: SpotifySong) { spotifySong.isLocallyStored = true }
 
     private fun searchSongInTrackService(term: String) = spotifyTrackService.getSong(term)
 
