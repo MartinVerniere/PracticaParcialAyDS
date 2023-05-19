@@ -59,7 +59,7 @@ class SongRepository {
         }
 
         // the service
-        spotifySong = spotifyTrackService.getSong(term)
+        spotifySong = searchSongInSongRepository(term)
         if (spotifySong != null) {
             spotifyLocalStorage.insertSong(term, spotifySong)
             return spotifySong
@@ -88,4 +88,6 @@ class SongRepository {
     private fun searchSongInCache(term: String) = spotifyCache[term]
 
     private fun searchSongInLocalStorage(term: String) = spotifyLocalStorage.getSongByTerm(term)
+
+    private fun searchSongInSongRepository(term: String) = spotifyTrackService.getSong(term)
 }
