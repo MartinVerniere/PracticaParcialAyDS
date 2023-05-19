@@ -17,45 +17,40 @@ import java.io.IOException
 
 
 private const val WIKI_URL = "https://en.wikipedia.org/w/"
-private const val JSON = "JSON"
 private const val QUERY = "query"
 private const val SEARCH = "search"
 private const val SNIPPET = "snippet"
 
 class SongRepository {
 
-    internal val spotifyLocalStorage = SpotifySqlDBImpl(
+    private val spotifyLocalStorage = SpotifySqlDBImpl(
         SpotifySqlQueriesImpl(), ResultSetToSpotifySongMapperImpl()
     )
-    val spotifyTrackService = SpotifyModule.spotifyTrackService
+    private val spotifyTrackService = SpotifyModule.spotifyTrackService
 
     val spotifyCache = mutableMapOf<String, SpotifySong>()
 
-    ///// Wiki
-    var retrofit: Retrofit? = Retrofit.Builder()
+    private var retrofit: Retrofit? = Retrofit.Builder()
         .baseUrl(WIKI_URL)
         .addConverterFactory(ScalarsConverterFactory.create())
         .build()
 
-    var wikipediaAPI = retrofit!!.create(WikipediaAPI::class.java)
-    //// end wiki
+    private var wikipediaAPI: WikipediaAPI = retrofit!!.create(WikipediaAPI::class.java)
 
     fun getSongByTerm(term: String): SearchResult {
-        // check in the cache
         var spotifySong = searchSongInCache(term)
         when (spotifySong) {
             is SpotifySong -> markSongAsCacheStored(spotifySong)
-            else -> { // check in the DB
+            else -> {
                 spotifySong = searchSongInLocalStorage(term)
                 when (spotifySong){
                     is SpotifySong -> {
                         markSongAsLocallyStored(spotifySong)
-                        // update the cache
                         updateCacheWithSong(term,spotifySong)
                     }
-                    else -> {  // the service
+                    else -> {
                         spotifySong = searchSongInSongRepository(term)
-                        when (spotifySong){ /////// Last chance, get anything from the wiki
+                        when (spotifySong){
                             is SpotifySong -> spotifyLocalStorage.insertSong(term, spotifySong)
                             else -> spotifySong=getSongFromWikipedia(term)
                         }
@@ -83,7 +78,6 @@ class SongRepository {
         val callResponse: Response<String>
         try {
             callResponse = wikipediaAPI.getInfo(term).execute()
-            System.out.println(JSON + callResponse.body())
             val snippetObj = getSnippetObject(callResponse)
             if (snippetObj != null) {
                 val snippet = snippetObj.asJsonObject[SNIPPET]
