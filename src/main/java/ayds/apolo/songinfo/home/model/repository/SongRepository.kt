@@ -49,7 +49,7 @@ class SongRepository {
                         updateCacheWithSong(term,spotifySong)
                     }
                     else -> {
-                        spotifySong = searchSongInSongRepository(term)
+                        spotifySong = searchSongInTrackService(term)
                         when (spotifySong){
                             is SpotifySong -> spotifyLocalStorage.insertSong(term, spotifySong)
                             else -> spotifySong=getSongFromWikipedia(term)
@@ -72,7 +72,7 @@ class SongRepository {
 
     private fun markSongAsLocallyStored(spotifySong: SpotifySong) { spotifySong.isLocallyStored = true }
 
-    private fun searchSongInSongRepository(term: String) = spotifyTrackService.getSong(term)
+    private fun searchSongInTrackService(term: String) = spotifyTrackService.getSong(term)
 
     private fun getSongFromWikipedia(term: String): SpotifySong? {
         val callResponse: Response<String>
