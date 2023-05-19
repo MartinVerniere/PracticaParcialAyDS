@@ -21,7 +21,11 @@ private const val QUERY = "query"
 private const val SEARCH = "search"
 private const val SNIPPET = "snippet"
 
-class SongRepository {
+interface SongRepository {
+    fun getSongByTerm(term: String): SearchResult
+}
+
+internal class SongRepositoryImpl: SongRepository {
 
     private val spotifyLocalStorage = SpotifySqlDBImpl(
         SpotifySqlQueriesImpl(), ResultSetToSpotifySongMapperImpl()
@@ -37,7 +41,7 @@ class SongRepository {
 
     private var wikipediaAPI: WikipediaAPI = retrofit!!.create(WikipediaAPI::class.java)
 
-    fun getSongByTerm(term: String): SearchResult {
+    override fun getSongByTerm(term: String): SearchResult {
         var spotifySong = searchSongInCache(term)
         when (spotifySong) {
             is SpotifySong -> markSongAsCacheStored(spotifySong)
