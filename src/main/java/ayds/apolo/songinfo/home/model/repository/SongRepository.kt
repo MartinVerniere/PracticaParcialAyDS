@@ -64,7 +64,6 @@ internal class SongRepositoryImpl(
         .baseUrl(WIKI_URL)
         .addConverterFactory(ScalarsConverterFactory.create())
         .build()
-
     private fun initWikipediaAPI(retrofit: Retrofit) = retrofit.create(WikipediaAPI::class.java)
 
     private fun searchSongInCache(term: String) = spotifyCache[term]
