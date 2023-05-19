@@ -28,7 +28,7 @@ class SongRepository {
     )
     private val spotifyTrackService = SpotifyModule.spotifyTrackService
 
-    val spotifyCache = mutableMapOf<String, SpotifySong>()
+    private val spotifyCache = mutableMapOf<String, SpotifySong>()
 
     private var retrofit: Retrofit? = Retrofit.Builder()
         .baseUrl(WIKI_URL)
