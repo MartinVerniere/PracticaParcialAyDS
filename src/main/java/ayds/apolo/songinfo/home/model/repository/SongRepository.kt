@@ -79,12 +79,11 @@ internal class SongRepositoryImpl(
     private fun searchSongInTrackService(term: String) = spotifyTrackService.getSong(term)
 
     private fun getSongFromWikipedia(term: String): SpotifySong? {
-        val callResponse: Response<String>
         try {
-            callResponse = wikipediaAPI.getInfo(term).execute()
+            val callResponse = wikipediaAPI.getInfo(term).execute()
             val snippetObj = getSnippetObject(callResponse)
             if (snippetObj != null) {
-                val snippet = snippetObj.asJsonObject[SNIPPET]
+                val snippet = snippetObj.getSnippet()
                 return SpotifySong("", snippet.asString, " - ", " - ", " - ", "", "")
             }
         } catch (e1: IOException) {
@@ -96,7 +95,11 @@ internal class SongRepositoryImpl(
     private fun getSnippetObject(callResponse: Response<String>): JsonElement? {
         val gson = Gson()
         val jObj: JsonObject = gson.fromJson(callResponse.body(), JsonObject::class.java)
-        val query = jObj[QUERY].asJsonObject
-        return query[SEARCH].asJsonArray.firstOrNull()
+        val query = jObj.getQuery()
+        return query.getSearch()
     }
+
+    private fun JsonElement.getSnippet() = this.asJsonObject[SNIPPET]
+    private fun JsonObject.getQuery() = this[QUERY].asJsonObject
+    private fun JsonObject.getSearch() = this[SEARCH].asJsonArray.firstOrNull()
 }
