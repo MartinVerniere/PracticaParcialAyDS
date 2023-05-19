@@ -63,22 +63,7 @@ class SongRepository {
                 }
                 else {
                     /////// Last chance, get anything from the wiki
-                    val callResponse: Response<String>
-                    try {
-                        callResponse = wikipediaAPI.getInfo(term).execute()
-                        System.out.println(JSON + callResponse.body())
-                        val gson = Gson()
-                        val jobj: JsonObject =
-                            gson.fromJson(callResponse.body(), JsonObject::class.java)
-                        val query = jobj[QUERY].asJsonObject
-                        val snippetObj = query[SEARCH].asJsonArray.firstOrNull()
-                        if (snippetObj != null) {
-                            val snippet = snippetObj.asJsonObject[SNIPPET]
-                            spotifySong = SpotifySong("", snippet.asString, " - ", " - ", " - ", "", "")
-                        }
-                    } catch (e1: IOException) {
-                        e1.printStackTrace()
-                    }
+                    spotifySong=getSongFromWikipedia(term)
                 }
             }
         }
@@ -95,4 +80,24 @@ class SongRepository {
     private fun markSongAsLocallyStored(spotifySong: SpotifySong) { spotifySong.isLocallyStored = true }
 
     private fun searchSongInSongRepository(term: String) = spotifyTrackService.getSong(term)
+
+    private fun getSongFromWikipedia(term: String): SpotifySong? {
+        val callResponse: Response<String>
+        try {
+            callResponse = wikipediaAPI.getInfo(term).execute()
+            System.out.println(JSON + callResponse.body())
+            val gson = Gson()
+            val jobj: JsonObject =
+                gson.fromJson(callResponse.body(), JsonObject::class.java)
+            val query = jobj[QUERY].asJsonObject
+            val snippetObj = query[SEARCH].asJsonArray.firstOrNull()
+            if (snippetObj != null) {
+                val snippet = snippetObj.asJsonObject[SNIPPET]
+                return SpotifySong("", snippet.asString, " - ", " - ", " - ", "", "")
+            }
+        } catch (e1: IOException) {
+            e1.printStackTrace()
+        }
+        return null
+    }
 }
