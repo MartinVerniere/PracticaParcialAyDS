@@ -40,30 +40,25 @@ class SongRepository {
     //// end wiki
 
     fun getSongByTerm(term: String): SearchResult {
-        var spotifySong: SpotifySong?
-
         // check in the cache
-        spotifySong = searchSongInCache(term)
-        if (spotifySong != null) {
-            markSongAsCacheStored(spotifySong)
-        }
-        else {
-            // check in the DB
-            spotifySong = searchSongInLocalStorage(term)
-            if (spotifySong != null) {
-                markSongAsLocallyStored(spotifySong)
-                // update the cache
-                updateCacheWithSong(term,spotifySong)
-            }
-            else {
-                // the service
-                spotifySong = searchSongInSongRepository(term)
-                if (spotifySong != null) {
-                    spotifyLocalStorage.insertSong(term, spotifySong)
-                }
-                else {
-                    /////// Last chance, get anything from the wiki
-                    spotifySong=getSongFromWikipedia(term)
+        var spotifySong = searchSongInCache(term)
+        when (spotifySong){
+            is SpotifySong -> markSongAsCacheStored(spotifySong)
+            else -> { // check in the DB
+                spotifySong = searchSongInLocalStorage(term)
+                when (spotifySong){
+                    is SpotifySong -> {
+                        markSongAsLocallyStored(spotifySong)
+                        // update the cache
+                        updateCacheWithSong(term,spotifySong)
+                    }
+                    else -> {  // the service
+                        spotifySong = searchSongInSongRepository(term)
+                        when (spotifySong){ /////// Last chance, get anything from the wiki
+                            is SpotifySong -> spotifyLocalStorage.insertSong(term, spotifySong)
+                            else -> spotifySong=getSongFromWikipedia(term)
+                        }
+                    }
                 }
             }
         }
