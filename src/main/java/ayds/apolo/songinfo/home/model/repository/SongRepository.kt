@@ -26,7 +26,7 @@ interface SongRepository {
 internal class SongRepositoryImpl(
     private val spotifyLocalStorage: SpotifySqlDBImpl,
     private val spotifyTrackService: SpotifyTrackService
-): SongRepository {
+) : SongRepository {
 
     private val spotifyCache = initCache()
 
@@ -40,16 +40,16 @@ internal class SongRepositoryImpl(
             is SpotifySong -> markSongAsCacheStored(spotifySong)
             else -> {
                 spotifySong = searchSongInLocalStorage(term)
-                when (spotifySong){
+                when (spotifySong) {
                     is SpotifySong -> {
                         markSongAsLocallyStored(spotifySong)
-                        updateCacheWithSong(term,spotifySong)
+                        updateCacheWithSong(term, spotifySong)
                     }
                     else -> {
                         spotifySong = searchSongInTrackService(term)
-                        when (spotifySong){
+                        when (spotifySong) {
                             is SpotifySong -> spotifyLocalStorage.insertSong(term, spotifySong)
-                            else -> spotifySong=getSongFromWikipedia(term)
+                            else -> spotifySong = getSongFromWikipedia(term)
                         }
                     }
                 }
@@ -64,17 +64,24 @@ internal class SongRepositoryImpl(
         .baseUrl(WIKI_URL)
         .addConverterFactory(ScalarsConverterFactory.create())
         .build()
+
     private fun initWikipediaAPI(retrofit: Retrofit) = retrofit.create(WikipediaAPI::class.java)
 
     private fun searchSongInCache(term: String) = spotifyCache[term]
 
-    private fun markSongAsCacheStored(spotifySong: SpotifySong) { spotifySong.isCacheStored = true }
+    private fun markSongAsCacheStored(spotifySong: SpotifySong) {
+        spotifySong.isCacheStored = true
+    }
 
-    private fun updateCacheWithSong(term: String, spotifySong: SpotifySong){ spotifyCache[term] = spotifySong }
+    private fun updateCacheWithSong(term: String, spotifySong: SpotifySong) {
+        spotifyCache[term] = spotifySong
+    }
 
     private fun searchSongInLocalStorage(term: String) = spotifyLocalStorage.getSongByTerm(term)
 
-    private fun markSongAsLocallyStored(spotifySong: SpotifySong) { spotifySong.isLocallyStored = true }
+    private fun markSongAsLocallyStored(spotifySong: SpotifySong) {
+        spotifySong.isLocallyStored = true
+    }
 
     private fun searchSongInTrackService(term: String) = spotifyTrackService.getSong(term)
 
