@@ -13,7 +13,7 @@ import org.junit.Test
 class SongRepositoryTest {
 
     @Test
-    fun `when searchSongByTerm is called and song is cache stored should mark song as cache stored`() {
+    fun `when searchSongByTerm is called and song is cache stored, should mark song as cache stored`() {
 
         // Mock an object
         val service: SpotifyTrackService = mockk()
