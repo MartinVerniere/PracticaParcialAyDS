@@ -43,7 +43,7 @@ class SongRepository {
         var spotifySong: SpotifySong?
 
         // check in the cache
-        spotifySong = spotifyCache[term]
+        spotifySong = searchSongInCache(term)
         if (spotifySong != null) {
             spotifySong.isCacheStored = true
             return spotifySong
@@ -84,4 +84,6 @@ class SongRepository {
 
         return EmptySong
     }
+
+    private fun searchSongInCache(term: String) = spotifyCache[term]
 }
