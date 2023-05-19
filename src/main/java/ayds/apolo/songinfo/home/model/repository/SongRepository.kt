@@ -52,7 +52,7 @@ class SongRepository {
         // check in the DB
         spotifySong = searchSongInLocalStorage(term)
         if (spotifySong != null) {
-            spotifySong.isLocallyStored = true
+            setLocalStorageStored(spotifySong)
             // update the cache
             spotifyCache[term] = spotifySong
             return spotifySong
@@ -89,7 +89,10 @@ class SongRepository {
 
     private fun setCacheStored(spotifySong: SpotifySong) { spotifySong.isCacheStored = true }
 
+
     private fun searchSongInLocalStorage(term: String) = spotifyLocalStorage.getSongByTerm(term)
+
+    private fun setLocalStorageStored(spotifySong: SpotifySong) { spotifySong.isLocallyStored = true }
 
     private fun searchSongInSongRepository(term: String) = spotifyTrackService.getSong(term)
 }
