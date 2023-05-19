@@ -46,43 +46,44 @@ class SongRepository {
         spotifySong = searchSongInCache(term)
         if (spotifySong != null) {
             markSongAsCacheStored(spotifySong)
-            return spotifySong
         }
-
-        // check in the DB
-        spotifySong = searchSongInLocalStorage(term)
-        if (spotifySong != null) {
-            markSongAsLocallyStored(spotifySong)
-            // update the cache
-            spotifyCache[term] = spotifySong
-            return spotifySong
-        }
-
-        // the service
-        spotifySong = searchSongInSongRepository(term)
-        if (spotifySong != null) {
-            spotifyLocalStorage.insertSong(term, spotifySong)
-            return spotifySong
-        }
-
-        /////// Last chance, get anything from the wiki
-        val callResponse: Response<String>
-        try {
-            callResponse = wikipediaAPI.getInfo(term).execute()
-            System.out.println(JSON + callResponse.body())
-            val gson = Gson()
-            val jobj: JsonObject = gson.fromJson(callResponse.body(), JsonObject::class.java)
-            val query = jobj[QUERY].asJsonObject
-            val snippetObj = query[SEARCH].asJsonArray.firstOrNull()
-            if (snippetObj != null) {
-                val snippet = snippetObj.asJsonObject[SNIPPET]
-                return SpotifySong("", snippet.asString, " - ", " - ", " - ", "", "")
+        else {
+            // check in the DB
+            spotifySong = searchSongInLocalStorage(term)
+            if (spotifySong != null) {
+                markSongAsLocallyStored(spotifySong)
+                // update the cache
+                spotifyCache[term] = spotifySong
             }
-        } catch (e1: IOException) {
-            e1.printStackTrace()
+            else {
+                // the service
+                spotifySong = searchSongInSongRepository(term)
+                if (spotifySong != null) {
+                    spotifyLocalStorage.insertSong(term, spotifySong)
+                }
+                else {
+                    /////// Last chance, get anything from the wiki
+                    val callResponse: Response<String>
+                    try {
+                        callResponse = wikipediaAPI.getInfo(term).execute()
+                        System.out.println(JSON + callResponse.body())
+                        val gson = Gson()
+                        val jobj: JsonObject =
+                            gson.fromJson(callResponse.body(), JsonObject::class.java)
+                        val query = jobj[QUERY].asJsonObject
+                        val snippetObj = query[SEARCH].asJsonArray.firstOrNull()
+                        if (snippetObj != null) {
+                            val snippet = snippetObj.asJsonObject[SNIPPET]
+                            spotifySong = SpotifySong("", snippet.asString, " - ", " - ", " - ", "", "")
+                        }
+                    } catch (e1: IOException) {
+                        e1.printStackTrace()
+                    }
+                }
+            }
         }
 
-        return EmptySong
+        return spotifySong ?: EmptySong
     }
 
     private fun searchSongInCache(term: String) = spotifyCache[term]
