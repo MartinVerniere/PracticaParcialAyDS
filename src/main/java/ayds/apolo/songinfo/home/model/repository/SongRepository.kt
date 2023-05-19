@@ -8,6 +8,7 @@ import ayds.apolo.songinfo.home.model.repository.local.spotify.sqldb.ResultSetTo
 import ayds.apolo.songinfo.home.model.repository.local.spotify.sqldb.SpotifySqlDBImpl
 import ayds.apolo.songinfo.home.model.repository.local.spotify.sqldb.SpotifySqlQueriesImpl
 import com.google.gson.Gson
+import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import retrofit2.Response
 import retrofit2.Retrofit
@@ -42,7 +43,7 @@ class SongRepository {
     fun getSongByTerm(term: String): SearchResult {
         // check in the cache
         var spotifySong = searchSongInCache(term)
-        when (spotifySong){
+        when (spotifySong) {
             is SpotifySong -> markSongAsCacheStored(spotifySong)
             else -> { // check in the DB
                 spotifySong = searchSongInLocalStorage(term)
@@ -83,11 +84,7 @@ class SongRepository {
         try {
             callResponse = wikipediaAPI.getInfo(term).execute()
             System.out.println(JSON + callResponse.body())
-            val gson = Gson()
-            val jobj: JsonObject =
-                gson.fromJson(callResponse.body(), JsonObject::class.java)
-            val query = jobj[QUERY].asJsonObject
-            val snippetObj = query[SEARCH].asJsonArray.firstOrNull()
+            val snippetObj = getSnippetObject(callResponse)
             if (snippetObj != null) {
                 val snippet = snippetObj.asJsonObject[SNIPPET]
                 return SpotifySong("", snippet.asString, " - ", " - ", " - ", "", "")
@@ -96,5 +93,12 @@ class SongRepository {
             e1.printStackTrace()
         }
         return null
+    }
+
+    private fun getSnippetObject(callResponse: Response<String>): JsonElement? {
+        val gson = Gson()
+        val jObj: JsonObject = gson.fromJson(callResponse.body(), JsonObject::class.java)
+        val query = jObj[QUERY].asJsonObject
+        return query[SEARCH].asJsonArray.firstOrNull()
     }
 }
