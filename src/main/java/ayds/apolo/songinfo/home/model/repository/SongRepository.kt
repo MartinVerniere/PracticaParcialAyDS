@@ -80,7 +80,7 @@ internal class SongRepositoryImpl(
 
     private fun getSongFromWikipedia(term: String): SpotifySong? {
         try {
-            val callResponse = wikipediaAPI.getInfo(term).execute()
+            val callResponse = getCallResponse(term)
             val snippetObj = getSnippetObject(callResponse)
             if (snippetObj != null) {
                 val snippet = snippetObj.getSnippet()
@@ -91,6 +91,8 @@ internal class SongRepositoryImpl(
         }
         return null
     }
+
+    private fun getCallResponse(term: String) = wikipediaAPI.getInfo(term).execute()
 
     private fun getSnippetObject(callResponse: Response<String>): JsonElement? {
         val gson = Gson()
