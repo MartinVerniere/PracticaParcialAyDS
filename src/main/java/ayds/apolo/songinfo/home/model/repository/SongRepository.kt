@@ -53,7 +53,7 @@ class SongRepository {
             if (spotifySong != null) {
                 markSongAsLocallyStored(spotifySong)
                 // update the cache
-                spotifyCache[term] = spotifySong
+                updateCacheWithSong(term,spotifySong)
             }
             else {
                 // the service
@@ -74,6 +74,8 @@ class SongRepository {
     private fun searchSongInCache(term: String) = spotifyCache[term]
 
     private fun markSongAsCacheStored(spotifySong: SpotifySong) { spotifySong.isCacheStored = true }
+
+    private fun updateCacheWithSong(term: String, spotifySong: SpotifySong){ spotifyCache[term] = spotifySong }
 
     private fun searchSongInLocalStorage(term: String) = spotifyLocalStorage.getSongByTerm(term)
 
