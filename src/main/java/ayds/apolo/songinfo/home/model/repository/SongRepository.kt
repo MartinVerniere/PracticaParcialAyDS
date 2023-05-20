@@ -4,7 +4,8 @@ import ayds.apolo.songinfo.home.model.entities.EmptySong
 import ayds.apolo.songinfo.home.model.entities.SearchResult
 import ayds.apolo.songinfo.home.model.entities.SpotifySong
 import ayds.apolo.songinfo.home.model.repository.external.spotify.SpotifyTrackService
-import ayds.apolo.songinfo.home.model.repository.local.spotify.sqldb.SpotifySqlDBImpl
+import ayds.apolo.songinfo.home.model.repository.local.cache.SpotifyCache
+import ayds.apolo.songinfo.home.model.repository.local.spotify.SpotifyLocalStorage
 import com.google.gson.Gson
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
@@ -24,16 +25,16 @@ interface SongRepository {
 }
 
 internal class SongRepositoryImpl(
-    private val spotifyLocalStorage: SpotifySqlDBImpl,
+    private val spotifyCache: SpotifyCache,
+    private val spotifyLocalStorage: SpotifyLocalStorage,
     private val spotifyTrackService: SpotifyTrackService
 ) : SongRepository {
 
-    private val spotifyCache = initCache()
     private var retrofit: Retrofit = initRetrofit()
     private var wikipediaAPI: WikipediaAPI = initWikipediaAPI(retrofit)
 
     override fun getSongByTerm(term: String): SearchResult {
-        var spotifySong = searchSongInCache(term)
+        var spotifySong = spotifyCache.searchSongInCache(term)
         when (spotifySong) {
             is SpotifySong -> markSongAsCacheStored(spotifySong)
             else -> {
@@ -41,7 +42,7 @@ internal class SongRepositoryImpl(
                 when (spotifySong) {
                     is SpotifySong -> {
                         markSongAsLocallyStored(spotifySong)
-                        updateCacheWithSong(term, spotifySong)
+                        spotifyCache.updateCacheWithSong(term, spotifySong)
                     }
                     else -> {
                         spotifySong = searchSongInTrackService(term)
@@ -57,18 +58,13 @@ internal class SongRepositoryImpl(
         return spotifySong ?: EmptySong
     }
 
-    private fun initCache() = mutableMapOf<String, SpotifySong>()
     private fun initRetrofit() = Retrofit.Builder()
         .baseUrl(WIKI_URL)
         .addConverterFactory(ScalarsConverterFactory.create())
         .build()
     private fun initWikipediaAPI(retrofit: Retrofit) = retrofit.create(WikipediaAPI::class.java)
 
-    private fun searchSongInCache(term: String) = spotifyCache[term]
-
     private fun markSongAsCacheStored(spotifySong: SpotifySong) { spotifySong.isCacheStored = true }
-
-    private fun updateCacheWithSong(term: String, spotifySong: SpotifySong) { spotifyCache[term] = spotifySong }
 
     private fun searchSongInLocalStorage(term: String) = spotifyLocalStorage.getSongByTerm(term)
 
