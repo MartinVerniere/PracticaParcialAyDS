@@ -62,13 +62,18 @@ internal class SongRepositoryImpl(
         .baseUrl(WIKI_URL)
         .addConverterFactory(ScalarsConverterFactory.create())
         .build()
+
     private fun initWikipediaAPI(retrofit: Retrofit) = retrofit.create(WikipediaAPI::class.java)
 
-    private fun markSongAsCacheStored(spotifySong: SpotifySong) { spotifySong.isCacheStored = true }
+    private fun markSongAsCacheStored(spotifySong: SpotifySong) {
+        spotifySong.isCacheStored = true
+    }
 
     private fun searchSongInLocalStorage(term: String) = spotifyLocalStorage.getSongByTerm(term)
 
-    private fun markSongAsLocallyStored(spotifySong: SpotifySong) { spotifySong.isLocallyStored = true }
+    private fun markSongAsLocallyStored(spotifySong: SpotifySong) {
+        spotifySong.isLocallyStored = true
+    }
 
     private fun searchSongInTrackService(term: String) = spotifyTrackService.getSong(term)
 
