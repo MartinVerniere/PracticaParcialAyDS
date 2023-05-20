@@ -29,9 +29,7 @@ internal class SongRepositoryImpl(
 ) : SongRepository {
 
     private val spotifyCache = initCache()
-
     private var retrofit: Retrofit = initRetrofit()
-
     private var wikipediaAPI: WikipediaAPI = initWikipediaAPI(retrofit)
 
     override fun getSongByTerm(term: String): SearchResult {
