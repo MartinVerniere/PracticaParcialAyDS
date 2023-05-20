@@ -3,6 +3,7 @@ package ayds.apolo.songinfo.home.model.repository
 import ayds.apolo.songinfo.home.model.entities.EmptySong
 import ayds.apolo.songinfo.home.model.entities.SpotifySong
 import ayds.apolo.songinfo.home.model.repository.external.spotify.SpotifyTrackService
+import ayds.apolo.songinfo.home.model.repository.local.cache.SpotifyCacheImpl
 import ayds.apolo.songinfo.home.model.repository.local.spotify.sqldb.SpotifySqlDBImpl
 import io.mockk.every
 import io.mockk.mockk
@@ -14,12 +15,12 @@ import org.junit.Test
 
 class SongRepositoryTest {
 
-    //private val spotifyCache: Map<String, SpotifySong> = mockk(relaxUnitFun = true)
+    private val spotifyCache: SpotifyCacheImpl = mockk(relaxUnitFun = true)
     private val spotifyLocalStorage: SpotifySqlDBImpl = mockk(relaxUnitFun = true)
     private val spotifyTrackService: SpotifyTrackService = mockk(relaxUnitFun = true)
 
     private val songRepository: SongRepository by lazy {
-        SongRepositoryImpl(spotifyLocalStorage, spotifyTrackService)
+        SongRepositoryImpl(spotifyCache, spotifyLocalStorage, spotifyTrackService)
     }
 
     @Test
@@ -46,7 +47,7 @@ class SongRepositoryTest {
             isLocallyStored = false,
             isCacheStored = true
         )
-        //every { spotifyCache.getSongByTerm("term") } returns song
+        every { spotifyCache.searchSongInCache("term") } returns song
 
         val result = songRepository.getSongByTerm("term")
 
@@ -79,7 +80,7 @@ class SongRepositoryTest {
             isCacheStored = false
         )
 
-        //every { spotifyCache.getSongByTerm("term") } returns null
+        every { spotifyCache.searchSongInCache("term") } returns null
         every { spotifyLocalStorage.getSongByTerm("term") } returns song
 
         val result = songRepository.getSongByTerm("term")
@@ -113,7 +114,7 @@ class SongRepositoryTest {
             isCacheStored = false
         )
 
-        //every { spotifyCache.getSongByTerm("term") } returns null
+        every { spotifyCache.searchSongInCache("term") } returns null
         every { spotifyLocalStorage.getSongByTerm("term") } returns null
         every { spotifyTrackService.getSong("term") } returns song
 
