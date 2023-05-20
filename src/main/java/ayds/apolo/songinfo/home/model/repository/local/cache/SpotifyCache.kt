@@ -9,11 +9,13 @@ interface SpotifyCache {
     fun updateCacheWithSong(term: String, spotifySong: SpotifySong)
 }
 
-internal class SpotifyCacheImpl: SpotifyCache{
+internal class SpotifyCacheImpl : SpotifyCache {
 
     private val cacheStorage = mutableMapOf<String, SpotifySong>()
 
     override fun searchSongInCache(term: String): SpotifySong? = cacheStorage[term]
 
-    override fun updateCacheWithSong(term: String, spotifySong: SpotifySong) { cacheStorage[term] = spotifySong }
+    override fun updateCacheWithSong(term: String, spotifySong: SpotifySong) {
+        cacheStorage[term] = spotifySong
+    }
 }
