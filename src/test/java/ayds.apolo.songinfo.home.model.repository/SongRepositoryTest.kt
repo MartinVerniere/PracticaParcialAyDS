@@ -76,7 +76,7 @@ class SongRepositoryTest {
             "releaseDate",
             "spotifyURL",
             "imageURL",
-            isLocallyStored = false,
+            isLocallyStored = true,
             isCacheStored = false
         )
 
@@ -87,6 +87,7 @@ class SongRepositoryTest {
 
         assertEquals(result, expected)
         assertTrue(song.isLocallyStored)
+        verify { spotifyCache.updateCacheWithSong("term", song) }
     }
 
     @Test
