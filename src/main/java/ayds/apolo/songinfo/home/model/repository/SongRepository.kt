@@ -38,14 +38,14 @@ internal class SongRepositoryImpl(
         when (spotifySong) {
             is SpotifySong -> markSongAsCacheStored(spotifySong)
             else -> {
-                spotifySong = searchSongInLocalStorage(term)
+                spotifySong = spotifyLocalStorage.getSongByTerm(term)
                 when (spotifySong) {
                     is SpotifySong -> {
                         markSongAsLocallyStored(spotifySong)
                         spotifyCache.updateCacheWithSong(term, spotifySong)
                     }
                     else -> {
-                        spotifySong = searchSongInTrackService(term)
+                        spotifySong = spotifyTrackService.getSong(term)
                         when (spotifySong) {
                             is SpotifySong -> spotifyLocalStorage.insertSong(term, spotifySong)
                             else -> spotifySong = getSongFromWikipedia(term)
@@ -69,13 +69,9 @@ internal class SongRepositoryImpl(
         spotifySong.isCacheStored = true
     }
 
-    private fun searchSongInLocalStorage(term: String) = spotifyLocalStorage.getSongByTerm(term)
-
     private fun markSongAsLocallyStored(spotifySong: SpotifySong) {
         spotifySong.isLocallyStored = true
     }
-
-    private fun searchSongInTrackService(term: String) = spotifyTrackService.getSong(term)
 
     private fun getSongFromWikipedia(term: String): SpotifySong? {
         try {

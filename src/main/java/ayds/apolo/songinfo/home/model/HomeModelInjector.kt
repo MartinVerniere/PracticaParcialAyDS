@@ -1,6 +1,5 @@
 package ayds.apolo.songinfo.home.model
 
-import ayds.apolo.songinfo.home.model.entities.SpotifySong
 import ayds.apolo.songinfo.home.model.repository.SongRepository
 import ayds.apolo.songinfo.home.model.repository.SongRepositoryImpl
 import ayds.apolo.songinfo.home.model.repository.external.spotify.SpotifyModule
@@ -12,9 +11,7 @@ import ayds.apolo.songinfo.home.model.repository.local.spotify.sqldb.SpotifySqlQ
 object HomeModelInjector {
 
   private val spotifyCache = SpotifyCacheImpl()
-  private val spotifyLocalStorage = SpotifySqlDBImpl(
-    SpotifySqlQueriesImpl(), ResultSetToSpotifySongMapperImpl()
-  )
+  private val spotifyLocalStorage = SpotifySqlDBImpl(SpotifySqlQueriesImpl(), ResultSetToSpotifySongMapperImpl())
   private val spotifyTrackService = SpotifyModule.spotifyTrackService
 
   private val repository: SongRepository = SongRepositoryImpl(spotifyCache,spotifyLocalStorage,spotifyTrackService)
