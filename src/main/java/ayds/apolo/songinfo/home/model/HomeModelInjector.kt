@@ -13,8 +13,9 @@ object HomeModelInjector {
   private val spotifyCache = SpotifyCacheImpl()
   private val spotifyLocalStorage = SpotifySqlDBImpl(SpotifySqlQueriesImpl(), ResultSetToSpotifySongMapperImpl())
   private val spotifyTrackService = SpotifyModule.spotifyTrackService
+  private val spotifyWikipediaService = SpotifyModule.spotifyWikipediaAPIService
 
-  private val repository: SongRepository = SongRepositoryImpl(spotifyCache,spotifyLocalStorage,spotifyTrackService)
+  private val repository: SongRepository = SongRepositoryImpl(spotifyCache,spotifyLocalStorage,spotifyTrackService, spotifyWikipediaService)
 
   val homeModel: HomeModel = HomeModelImpl(repository)
 
