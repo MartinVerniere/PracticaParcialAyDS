@@ -3,6 +3,7 @@ package ayds.apolo.songinfo.home.model.repository
 import ayds.apolo.songinfo.home.model.entities.EmptySong
 import ayds.apolo.songinfo.home.model.entities.SpotifySong
 import ayds.apolo.songinfo.home.model.repository.external.spotify.SpotifyTrackService
+import ayds.apolo.songinfo.home.model.repository.external.wikipedia.WikipediaAPIServiceImpl
 import ayds.apolo.songinfo.home.model.repository.local.cache.SpotifyCacheImpl
 import ayds.apolo.songinfo.home.model.repository.local.spotify.sqldb.SpotifySqlDBImpl
 import io.mockk.every
@@ -18,9 +19,10 @@ class SongRepositoryTest {
     private val spotifyCache: SpotifyCacheImpl = mockk(relaxUnitFun = true)
     private val spotifyLocalStorage: SpotifySqlDBImpl = mockk(relaxUnitFun = true)
     private val spotifyTrackService: SpotifyTrackService = mockk(relaxUnitFun = true)
+    private val wikipediaService: WikipediaAPIServiceImpl = mockk(relaxUnitFun = true)
 
     private val songRepository: SongRepository by lazy {
-        SongRepositoryImpl(spotifyCache, spotifyLocalStorage, spotifyTrackService)
+        SongRepositoryImpl(spotifyCache, spotifyLocalStorage, spotifyTrackService,wikipediaService)
     }
 
     @Test
@@ -145,17 +147,23 @@ class SongRepositoryTest {
             "",
             "",
         )
-        //every { WikipediaAPI.getInfo("term") } returns song
+
+        every { spotifyCache.searchSongInCache("term") } returns null
+        every { spotifyLocalStorage.getSongByTerm("term") } returns null
+        every { spotifyTrackService.getSong("term") } returns null
+        every { wikipediaService.getSong("term") } returns song
 
         val result = songRepository.getSongByTerm("term")
 
         assertEquals(result, expected)
-        //verify { WikipediaAPI.getInfo("term",song) }
     }
 
     @Test
     fun `when searchSongByTerm is called and song is not in wiki, should return EmptySong`() {
-        //every { WikipediaAPI.getInfo("term") } returns EmptySong
+        every { spotifyCache.searchSongInCache("term") } returns null
+        every { spotifyLocalStorage.getSongByTerm("term") } returns null
+        every { spotifyTrackService.getSong("term") } returns null
+        every { wikipediaService.getSong("term") } returns null
 
         val result = songRepository.getSongByTerm("term")
         assertEquals(EmptySong, result)
